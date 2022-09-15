@@ -12,24 +12,51 @@
   $: itemTotal = items.reduce((a, b) => a + b.price, 0);
   $: remainingSubtotal = subtotal - itemTotal;
   let selectedName;
-  let taxPercentageString = "6.825";
-  $: taxPercentage = Number(taxPercentageString);
-  let tipPercentageString = "20";
-  $: tipPercentage = Number(tipPercentageString);
-  $: tipTotal = (subtotal * tipPercentage) / 100;
-  $: taxTotal = (subtotal * taxPercentage) / 100;
+  let taxPercentage = "6.825";
+  let tipPercentage = "20";
+  let tipTotal;
+  let taxTotal;
+
+  function setTipFromDollar(dollar) {
+    tipTotal = dollar;
+    tipPercentage = ((dollar / subtotal) * 100).toFixed(2);
+  }
+
+  function setTaxFromDollar(dollar) {
+    taxTotal = dollar;
+    taxPercentage = ((dollar / subtotal) * 100).toFixed(3);
+  }
+
+  function setTipFromPercent(percent) {
+    tipTotal = (subtotal * (percent / 100)).toFixed(2);
+    tipPercentage = percent;
+  }
+
+  function setTaxFromPercent(percent) {
+    taxTotal = (subtotal * (percent / 100)).toFixed(2);
+    taxPercentage = percent;
+  }
+
+  function updateTaxAndTipFromPercent() {
+    setTaxFromPercent(taxPercentage);
+    setTipFromPercent(tipPercentage);
+  }
 
   function nextState() {
     if (state == "People") state = "Subtotal";
     else if (state == "Subtotal") state = "Items";
-    else if (state == "Items") state = "Tip";
-    else if (state == "Tip") state = "Done";
+    else if (state == "Items") {
+      updateTaxAndTipFromPercent();
+      state = "Tip";
+    } else if (state == "Tip") state = "Done";
   }
 
   function goBack() {
     if (state == "Subtotal") state = "People";
-    else if (state == "Items") state = "Subtotal";
-    else if (state == "Tip") state = "Items";
+    else if (state == "Items") {
+      updateTaxAndTipFromPercent();
+      state = "Subtotal";
+    } else if (state == "Tip") state = "Items";
     else if (state == "Done") state = "Tip";
   }
 
@@ -67,7 +94,7 @@
   }
 
   function formatMoney(money) {
-    return `$${money.toFixed(2)}`;
+    return `$${Number(money).toFixed(2)}`;
   }
 
   function selectAll() {
@@ -77,7 +104,7 @@
 
   function addTaxAndTip(money) {
     return (
-      money + money * (taxPercentage / 100) + money * (tipPercentage / 100)
+      money + money * (+taxPercentage / 100) + money * (+tipPercentage / 100)
     );
   }
 
@@ -93,7 +120,7 @@
 
 <main>
   <button disabled={state == "People"} on:click={goBack}>back</button>
-  <br>
+  <br />
   {#if state == "People"}
     <form on:submit|preventDefault={submitPerson}>
       <label for="name-input">name #{people.length + 1}</label>
@@ -130,7 +157,7 @@
       <input type="submit" disabled={!subtotal} value="next" />
     </form>
   {:else if state == "Items"}
-    {#if remainingSubtotal != 0}
+    {#if +remainingSubtotal.toFixed(2) != 0}
       {#if items.length}
         <button on:click={splitRemaining}>split remaining equally</button>
         <p>OR</p>
@@ -202,7 +229,14 @@
     {/if}
     {#each items as item}
       <ul>
-        <li>{formatMoney(item.price)} - {item.people.join(", ")} <button on:click={()=>{removeItem(item)}}>remove</button></li>
+        <li>
+          {formatMoney(item.price)} - {item.people.join(", ")}
+          <button
+            on:click={() => {
+              removeItem(item);
+            }}>remove</button
+          >
+        </li>
       </ul>
     {/each}
   {:else if state == "Tip"}
@@ -211,21 +245,46 @@
       <input
         id="tax-input"
         inputmode="decimal"
-        bind:value={taxPercentageString}
+        value={taxPercentage}
+        on:input={(e) => setTaxFromPercent(e.target.value)}
       />
-      <br />
-      <label for="tip-input">tip %</label>
-      <input
-        id="tip-input"
-        inputmode="decimal"
-        bind:value={tipPercentageString}
-      />
-      <br />
-      <input
-        disabled={tipPercentage === NaN || taxPercentage === NaN}
-        type="submit"
-        value="next"
-      />
+      =
+      <label for="tax-input-dollar"
+        >$<label>
+          <input
+            id="tax-input-dollar"
+            inputmode="decimal"
+            value={taxTotal}
+            on:input={(e) => setTaxFromDollar(e.target.value)}
+          />
+          <br />
+          <label for="tip-input">tip %</label>
+          <input
+            id="tip-input"
+            inputmode="decimal"
+            value={tipPercentage}
+            on:input={(e) => setTipFromPercent(e.target.value)}
+          />
+          =
+          <label for="tax-input-dollar"
+            >$<label>
+              <input
+                id="tip-input-dollar"
+                inputmode="decimal"
+                value={tipTotal}
+                on:input={(e) => setTipFromDollar(e.target.value)}
+              />
+            </label>
+            <br />
+            <input
+              disabled={+tipPercentage === NaN || +taxPercentage === NaN}
+              type="submit"
+              value="next"
+              on:click={nextState}
+            />
+          </label></label
+        ></label
+      >
     </form>
   {:else if state == "Done"}
     <ul>
@@ -254,7 +313,7 @@
     <div>Subtotal: {formatMoney(subtotal)}</div>
     <div>Tax: {formatMoney(taxTotal)}</div>
     <div>Tip: {formatMoney(tipTotal)}</div>
-    <div>Total: {formatMoney(subtotal + taxTotal + tipTotal)}</div>
+    <div>Total: {formatMoney(Number(subtotal) + Number(taxTotal) + Number(tipTotal))}</div>
 
     <button>Reset</button>
   {/if}
