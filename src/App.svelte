@@ -182,7 +182,11 @@
           bind:this={itemPriceInput}
           bind:value={itemValueString}
         />
-        <br />
+        {#if +itemValue > remainingSubtotal}
+          <p class="error">
+            This item costs more than your remaining subtotal!
+          </p>
+        {/if}
         <div>this item applies to:</div>
         <div>
           {#each people as person}
@@ -191,7 +195,14 @@
               type="checkbox"
               bind:checked={person.checked}
             />
-            <label for="{person.name}-checkbox">{person.name}</label>
+            <label for="{person.name}-checkbox"
+              >{person.name}
+              {#if person.checked}
+                {`(+${formatMoney(
+                  itemValue / people.filter((p) => p.checked).length
+                )})`}
+              {/if}
+            </label>
             <br />
           {/each}
         </div>
@@ -201,11 +212,12 @@
         >
         <input
           type="submit"
-          disabled={!someoneIsChecked || !itemValue}
+          disabled={!someoneIsChecked || !itemValue || +itemValue > remainingSubtotal}
           value="add item"
         />
       </form>
     {:else}
+      <p>Nice! The items you added perfectly sum up to the subtotal you enterred.</p>
       <button on:click={nextState}>next</button>
     {/if}
     {#if items.length}
@@ -305,12 +317,14 @@
         Number(subtotal) + Number(taxTotal) + Number(tipTotal)
       )}
     </div>
-    <button>Reset</button>
   {/if}
 </main>
 
 <style>
   ul {
     margin: 0;
+  }
+  .error {
+    color: #e22;
   }
 </style>
