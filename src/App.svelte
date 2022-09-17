@@ -8,7 +8,6 @@
   $: itemValue = Number(itemValueString);
   $: someoneIsChecked = people.some((people) => people.checked);
   let items = [];
-  let shareItem = false;
   $: itemTotal = items.reduce((a, b) => a + b.price, 0);
   $: remainingSubtotal = subtotal - itemTotal;
   let selectedName;
@@ -16,6 +15,8 @@
   let tipPercentage = "20";
   let tipTotal;
   let taxTotal;
+  let nameInput;
+  let itemPriceInput;
 
   function setTipFromDollar(dollar) {
     tipTotal = dollar;
@@ -68,21 +69,22 @@
     });
     people = people;
     curName = "";
+    nameInput.focus();
   }
 
   function addItem() {
     items.push({
       price: itemValue,
-      people: shareItem
-        ? people.filter((person) => person.checked).map((person) => person.name)
-        : [selectedName],
+      people: people
+        .filter((person) => person.checked)
+        .map((person) => person.name),
     });
     items = items;
     itemValueString = "";
-    shareItem = false;
     selectedName = "";
     people.forEach((person) => (person.checked = false));
     people = people;
+    itemPriceInput.focus();
   }
 
   function splitRemaining() {
@@ -124,7 +126,13 @@
   {#if state == "People"}
     <form on:submit|preventDefault={submitPerson}>
       <label for="name-input">name #{people.length + 1}</label>
-      <input id="name-input" bind:value={curName} placeholder="name here" />
+      <input
+        autofocus
+        bind:this={nameInput}
+        id="name-input"
+        bind:value={curName}
+        placeholder="name here"
+      />
       <br />
       <input type="submit" disabled={!curName} value="add name" />
     </form>
@@ -136,7 +144,7 @@
       <div>{people.length} people named</div>
     {/if}
     <ul id="name-ul">
-      {#each people as person}
+      {#each [...people].reverse() as person}
         <li>
           {person.name}
           <button type="button" on:click={() => removePerson(person.name)}
@@ -150,6 +158,7 @@
     <form on:submit|preventDefault={nextState}>
       <span>$</span>
       <input
+        autofocus
         placeholder="subtotal"
         inputmode="decimal"
         bind:value={subtotalString}
@@ -159,59 +168,40 @@
   {:else if state == "Items"}
     {#if +remainingSubtotal.toFixed(2) != 0}
       {#if items.length}
-        <button on:click={splitRemaining}>split remaining equally</button>
-        <p>OR</p>
+        <button on:click={splitRemaining}
+          >split remaining {formatMoney(remainingSubtotal)} equally</button
+        >
       {/if}
       <form on:submit|preventDefault={addItem}>
         <label for="item-price-input">item #{items.length + 1} costs $</label>
         <input
+          autofocus
           id="item-price-input"
           placeholder="item price"
           inputmode="decimal"
+          bind:this={itemPriceInput}
           bind:value={itemValueString}
         />
         <br />
-        <input
-          id="split-item-checkbox"
-          type="checkbox"
-          disabled={!itemValue}
-          bind:checked={shareItem}
-        />
-        <label for="split-item-checkbox">people shared this item</label>
+        <div>this item applies to:</div>
         <div>
-          {#if shareItem}
-            <div>this item applies to:</div>
-            <div>
-              {#each people as person}
-                <input
-                  id="{person.name}-checkbox"
-                  type="checkbox"
-                  bind:checked={person.checked}
-                />
-                <label for="{person.name}-checkbox">{person.name}</label>
-                <br />
-              {/each}
-            </div>
-            <button
-              on:click|preventDefault={selectAll}
-              disabled={people.every((person) => person.checked)}
-              >select all</button
-            >
-          {:else}
-            <label for="person-select">this item applies to</label>
-            <select disabled={!itemValue} bind:value={selectedName}>
-              <option value="" disabled selected>select name</option>
-              {#each people as person}
-                <option value={person.name}>{person.name}</option>
-              {/each}
-            </select>
-          {/if}
+          {#each people as person}
+            <input
+              id="{person.name}-checkbox"
+              type="checkbox"
+              bind:checked={person.checked}
+            />
+            <label for="{person.name}-checkbox">{person.name}</label>
+            <br />
+          {/each}
         </div>
+        <button
+          on:click|preventDefault={selectAll}
+          disabled={people.every((person) => person.checked)}>select all</button
+        >
         <input
           type="submit"
-          disabled={(shareItem && !someoneIsChecked) ||
-            (!shareItem && !selectedName) ||
-            !itemValue}
+          disabled={!someoneIsChecked || !itemValue}
           value="add item"
         />
       </form>
@@ -220,12 +210,9 @@
     {/if}
     {#if items.length}
       <hr />
-    {/if}
-    {#if items.length}
       <p>
         Remaining subtotal: <strong>{formatMoney(remainingSubtotal)}</strong>
       </p>
-      <div>{items.length} items enterred</div>
     {/if}
     {#each items as item}
       <ul>
@@ -313,8 +300,11 @@
     <div>Subtotal: {formatMoney(subtotal)}</div>
     <div>Tax: {formatMoney(taxTotal)}</div>
     <div>Tip: {formatMoney(tipTotal)}</div>
-    <div>Total: {formatMoney(Number(subtotal) + Number(taxTotal) + Number(tipTotal))}</div>
-
+    <div>
+      Total: {formatMoney(
+        Number(subtotal) + Number(taxTotal) + Number(tipTotal)
+      )}
+    </div>
     <button>Reset</button>
   {/if}
 </main>
