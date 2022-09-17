@@ -124,7 +124,7 @@
   <button disabled={state == "People"} on:click={goBack}>back</button>
   <br />
   {#if state == "People"}
-    <form on:submit|preventDefault={submitPerson}>
+    <form on:submit|preventDefault={submitPerson} autocomplete="off">
       <label for="name-input">name #{people.length + 1}</label>
       <input
         autofocus
@@ -155,7 +155,7 @@
     </ul>
   {:else if state == "Subtotal"}
     <p>Enter subtotal <em>(total before tax and tip)</em></p>
-    <form on:submit|preventDefault={nextState}>
+    <form on:submit|preventDefault={nextState} autocomplete="off">
       <span>$</span>
       <input
         autofocus
@@ -172,7 +172,7 @@
           >split remaining {formatMoney(remainingSubtotal)} equally</button
         >
       {/if}
-      <form on:submit|preventDefault={addItem}>
+      <form on:submit|preventDefault={addItem} autocomplete="off">
         <label for="item-price-input">item #{items.length + 1} costs $</label>
         <input
           autofocus
@@ -227,7 +227,7 @@
       </ul>
     {/each}
   {:else if state == "Tip"}
-    <form on:submit|preventDefault={nextState}>
+    <form on:submit|preventDefault={nextState} autocomplete="off">
       <label for="tax-input">tax %</label>
       <input
         id="tax-input"
