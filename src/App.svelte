@@ -1,16 +1,21 @@
 <script>
+  const states = {
+    People: 0,
+    Subtotal: 1,
+    Items: 2,
+    Tip: 3,
+    Done: 4,
+  };
+
   let people = [];
-  let state = "People";
+  let state = states["People"];
   let curName;
-  let subtotalString;
-  $: subtotal = Number(subtotalString);
-  let itemValueString;
-  $: itemValue = Number(itemValueString);
+  let subtotal;
+  let itemValue;
   $: someoneIsChecked = people.some((people) => people.checked);
   let items = [];
   $: itemTotal = items.reduce((a, b) => a + b.price, 0);
-  $: remainingSubtotal = subtotal - itemTotal;
-  let selectedName;
+  $: remainingSubtotal = +subtotal - itemTotal;
   let taxPercentage = "6.825";
   let tipPercentage = "20";
   let tipTotal;
@@ -20,21 +25,21 @@
 
   function setTipFromDollar(dollar) {
     tipTotal = dollar;
-    tipPercentage = ((dollar / subtotal) * 100).toFixed(2);
+    tipPercentage = ((dollar / +subtotal) * 100).toFixed(2);
   }
 
   function setTaxFromDollar(dollar) {
     taxTotal = dollar;
-    taxPercentage = ((dollar / subtotal) * 100).toFixed(3);
+    taxPercentage = ((dollar / +subtotal) * 100).toFixed(3);
   }
 
   function setTipFromPercent(percent) {
-    tipTotal = (subtotal * (percent / 100)).toFixed(2);
+    tipTotal = (+subtotal * (percent / 100)).toFixed(2);
     tipPercentage = percent;
   }
 
   function setTaxFromPercent(percent) {
-    taxTotal = (subtotal * (percent / 100)).toFixed(2);
+    taxTotal = (+subtotal * (percent / 100)).toFixed(2);
     taxPercentage = percent;
   }
 
@@ -44,21 +49,12 @@
   }
 
   function nextState() {
-    if (state == "People") state = "Subtotal";
-    else if (state == "Subtotal") state = "Items";
-    else if (state == "Items") {
-      updateTaxAndTipFromPercent();
-      state = "Tip";
-    } else if (state == "Tip") state = "Done";
+    state += 1;
+    if (state == states.Tip) updateTaxAndTipFromPercent();
   }
 
   function goBack() {
-    if (state == "Subtotal") state = "People";
-    else if (state == "Items") {
-      updateTaxAndTipFromPercent();
-      state = "Subtotal";
-    } else if (state == "Tip") state = "Items";
-    else if (state == "Done") state = "Tip";
+    state -= 1;
   }
 
   function submitPerson() {
@@ -74,14 +70,13 @@
 
   function addItem() {
     items.push({
-      price: itemValue,
+      price: +itemValue,
       people: people
         .filter((person) => person.checked)
         .map((person) => person.name),
     });
     items = items;
-    itemValueString = "";
-    selectedName = "";
+    itemValue = "";
     people.forEach((person) => (person.checked = false));
     people = people;
     itemPriceInput.focus();
@@ -96,7 +91,7 @@
   }
 
   function formatMoney(money) {
-    return `$${Number(money).toFixed(2)}`;
+    return `$${(+money).toFixed(2)}`;
   }
 
   function selectAll() {
@@ -121,9 +116,9 @@
 </script>
 
 <main>
-  <button disabled={state == "People"} on:click={goBack}>back</button>
+  <button disabled={state == states.People} on:click={goBack}>back</button>
   <br />
-  {#if state == "People"}
+  {#if state == states.People}
     <form on:submit|preventDefault={submitPerson} autocomplete="off">
       <label for="name-input">name #{people.length + 1}</label>
       <input
@@ -153,7 +148,7 @@
         </li>
       {/each}
     </ul>
-  {:else if state == "Subtotal"}
+  {:else if state == states.Subtotal}
     <p>Enter subtotal <em>(total before tax and tip)</em></p>
     <form on:submit|preventDefault={nextState} autocomplete="off">
       <span>$</span>
@@ -161,11 +156,11 @@
         autofocus
         placeholder="subtotal"
         inputmode="decimal"
-        bind:value={subtotalString}
+        bind:value={subtotal}
       />
-      <input type="submit" disabled={!subtotal} value="next" />
+      <input type="submit" disabled={!+subtotal} value="next" />
     </form>
-  {:else if state == "Items"}
+  {:else if state == states.Items}
     {#if +remainingSubtotal.toFixed(2) != 0}
       {#if items.length}
         <button on:click={splitRemaining}
@@ -180,7 +175,7 @@
           placeholder="item price"
           inputmode="decimal"
           bind:this={itemPriceInput}
-          bind:value={itemValueString}
+          bind:value={itemValue}
         />
         {#if +itemValue > remainingSubtotal}
           <p class="error">
@@ -199,7 +194,7 @@
               >{person.name}
               {#if person.checked}
                 {`(+${formatMoney(
-                  itemValue / people.filter((p) => p.checked).length
+                  +itemValue / people.filter((p) => p.checked).length
                 )})`}
               {/if}
             </label>
@@ -212,12 +207,16 @@
         >
         <input
           type="submit"
-          disabled={!someoneIsChecked || !itemValue || +itemValue > remainingSubtotal}
+          disabled={!someoneIsChecked ||
+            !+itemValue ||
+            +itemValue > remainingSubtotal}
           value="add item"
         />
       </form>
     {:else}
-      <p>Nice! The items you added perfectly sum up to the subtotal you enterred.</p>
+      <p>
+        Nice! The items you added perfectly sum up to the subtotal you enterred.
+      </p>
       <button on:click={nextState}>next</button>
     {/if}
     {#if items.length}
@@ -238,7 +237,7 @@
         </li>
       </ul>
     {/each}
-  {:else if state == "Tip"}
+  {:else if state == states.Tip}
     <form on:submit|preventDefault={nextState} autocomplete="off">
       <label for="tax-input">tax %</label>
       <input
@@ -285,7 +284,7 @@
         ></label
       >
     </form>
-  {:else if state == "Done"}
+  {:else if state == states.Done}
     <ul>
       {#each people as person}
         <li>
@@ -309,13 +308,11 @@
       {/each}
     </ul>
 
-    <div>Subtotal: {formatMoney(subtotal)}</div>
+    <div>Subtotal: {formatMoney(+subtotal)}</div>
     <div>Tax: {formatMoney(taxTotal)}</div>
     <div>Tip: {formatMoney(tipTotal)}</div>
     <div>
-      Total: {formatMoney(
-        Number(subtotal) + Number(taxTotal) + Number(tipTotal)
-      )}
+      Total: {formatMoney(+subtotal + +taxTotal + +tipTotal)}
     </div>
   {/if}
 </main>
