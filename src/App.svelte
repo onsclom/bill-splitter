@@ -128,10 +128,9 @@
         bind:value={curName}
         placeholder="name here"
       />
-      <br />
       <input type="submit" disabled={!curName} value="add name" />
     </form>
-    <button on:click={nextState} disabled={people.length < 2}>next</button>
+    <button on:click={nextState} disabled={people.length < 2}>done with names</button>
     {#if people.length}
       <hr />
     {/if}
@@ -187,19 +186,22 @@
         <div>this item applies to:</div>
         <div>
           {#each people as person}
-            <input
+            <button on:click|preventDefault={()=>person.checked=!person.checked}>
+              {person.name}
+            </button>
+            <!-- <input
               id="{person.name}-checkbox"
               type="checkbox"
               bind:checked={person.checked}
             />
-            <label for="{person.name}-checkbox"
-              >{person.name}
+            <label for="{person.name}-checkbox" -->
+              <!-- >{person.name} -->
               {#if person.checked}
                 {`(+${formatMoney(
                   +itemValue / people.filter((p) => p.checked).length
                 )})`}
               {/if}
-            </label>
+            <!-- </label> -->
             <br />
           {/each}
         </div>
@@ -241,8 +243,7 @@
     {/each}
   {:else if state == states.Tip}
     <form on:submit|preventDefault={nextState} autocomplete="off">
-      <label for="tax-input">tax %</label>
-      <input
+      <label for="tax-input">tax %</label><input
         id="tax-input"
         inputmode="decimal"
         value={taxPercentage}
@@ -250,10 +251,7 @@
         class="numberInput"
         on:focus={event => event.target.select()}
         on:input={(e) => setTaxFromPercent(e.target.value)}
-      />
-      =
-      <label for="tax-input-dollar">$</label>
-      <input
+      /> = <label for="tax-input-dollar">$</label><input
         id="tax-input-dollar"
         inputmode="decimal"
         value={taxTotal}
@@ -263,8 +261,7 @@
         on:input={(e) => setTaxFromDollar(e.target.value)}
       />
       <br />
-      <label for="tip-input">tip %</label>
-      <input
+      <label for="tip-input">tip %</label><input
         id="tip-input"
         inputmode="decimal"
         value={tipPercentage}
@@ -272,10 +269,7 @@
         class="numberInput"
         on:focus={event => event.target.select()}
         on:input={(e) => setTipFromPercent(e.target.value)}
-      />
-      =
-      <label for="tax-input-dollar">$</label>
-      <input
+      /> = <label for="tax-input-dollar">$</label><input
         id="tip-input-dollar"
         inputmode="decimal"
         value={tipTotal}
