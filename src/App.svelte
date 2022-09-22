@@ -247,42 +247,42 @@
         on:input={(e) => setTaxFromPercent(e.target.value)}
       />
       =
-      <label for="tax-input-dollar"
-        >$<label>
-          <input
-            id="tax-input-dollar"
-            inputmode="decimal"
-            value={taxTotal}
-            on:input={(e) => setTaxFromDollar(e.target.value)}
-          />
-          <br />
-          <label for="tip-input">tip %</label>
-          <input
-            id="tip-input"
-            inputmode="decimal"
-            value={tipPercentage}
-            on:input={(e) => setTipFromPercent(e.target.value)}
-          />
-          =
-          <label for="tax-input-dollar"
-            >$<label>
-              <input
-                id="tip-input-dollar"
-                inputmode="decimal"
-                value={tipTotal}
-                on:input={(e) => setTipFromDollar(e.target.value)}
-              />
-            </label>
-            <br />
-            <input
-              disabled={+tipPercentage === NaN || +taxPercentage === NaN}
-              type="submit"
-              value="next"
-              on:click={nextState}
-            />
-          </label></label
-        ></label
-      >
+      <label for="tax-input-dollar">$</label>
+      <input
+        id="tax-input-dollar"
+        inputmode="decimal"
+        value={taxTotal}
+        placeholder="0.00"
+        class="numberInput"
+        on:input={(e) => setTaxFromDollar(e.target.value)}
+      />
+      <br />
+      <label for="tip-input">tip %</label>
+      <input
+        id="tip-input"
+        inputmode="decimal"
+        value={tipPercentage}
+        placeholder="0.00"
+        class="numberInput"
+        on:input={(e) => setTipFromPercent(e.target.value)}
+      />
+      =
+      <label for="tax-input-dollar">$</label>
+      <input
+        id="tip-input-dollar"
+        inputmode="decimal"
+        value={tipTotal}
+        placeholder="0.00"
+        class="numberInput"
+        on:input={(e) => setTipFromDollar(e.target.value)}
+      />
+      <br />
+      <input
+        disabled={+tipPercentage === NaN || +taxPercentage === NaN}
+        type="submit"
+        value="next"
+        on:click={nextState}
+      />
     </form>
   {:else if state == states.Done}
     <ul>
