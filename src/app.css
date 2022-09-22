@@ -16,6 +16,28 @@ main {
   padding: 1rem;
 }
 
+label {
+  font-size: 1rem;
+}
+
 input, button {
   font-size: 1rem;
+  padding: .4rem;
+}
+
+
+input[type=submit], input[type=text], button {
+  padding: .4rem;
+}
+
+input[type=submit], button {
+  padding: .5rem;
+}
+
+input[type=number] {
+  max-width: 4rem;
+}
+
+p, ul, li {
+  margin: 0
 }
