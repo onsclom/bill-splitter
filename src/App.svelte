@@ -248,6 +248,7 @@
         value={taxPercentage}
         placeholder="0.00"
         class="numberInput"
+        on:focus={event => event.target.select()}
         on:input={(e) => setTaxFromPercent(e.target.value)}
       />
       =
@@ -258,6 +259,7 @@
         value={taxTotal}
         placeholder="0.00"
         class="numberInput"
+        on:focus={event => event.target.select()}
         on:input={(e) => setTaxFromDollar(e.target.value)}
       />
       <br />
@@ -268,6 +270,7 @@
         value={tipPercentage}
         placeholder="0.00"
         class="numberInput"
+        on:focus={event => event.target.select()}
         on:input={(e) => setTipFromPercent(e.target.value)}
       />
       =
@@ -278,6 +281,7 @@
         value={tipTotal}
         placeholder="0.00"
         class="numberInput"
+        on:focus={event => event.target.select()}
         on:input={(e) => setTipFromDollar(e.target.value)}
       />
       <br />
