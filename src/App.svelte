@@ -288,6 +288,11 @@
         on:click={nextState}
       />
     </form>
+    <hr>
+    <div>Subtotal: {formatMoney(+subtotal)}</div>
+    <div>Tax: {formatMoney(taxTotal)}</div>
+    <div>Tip: {formatMoney(tipTotal)}</div>
+    <div>Total: {formatMoney(+subtotal + +taxTotal + +tipTotal)}</div>
   {:else if state == states.Done}
     <ul>
       {#each people as person}
@@ -315,9 +320,7 @@
     <div>Subtotal: {formatMoney(+subtotal)}</div>
     <div>Tax: {formatMoney(taxTotal)}</div>
     <div>Tip: {formatMoney(tipTotal)}</div>
-    <div>
-      Total: {formatMoney(+subtotal + +taxTotal + +tipTotal)}
-    </div>
+    <div>Total: {formatMoney(+subtotal + +taxTotal + +tipTotal)}</div>
   {/if}
 </main>
 
