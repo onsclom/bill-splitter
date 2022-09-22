@@ -217,7 +217,7 @@
       </form>
     {:else}
       <p>
-        Nice! The items you added perfectly sum up to the subtotal you enterred.
+        Nice! The items you added perfectly sum up.
       </p>
       <button on:click={nextState}>next</button>
     {/if}
@@ -301,14 +301,14 @@
     <ul>
       {#each people as person}
         <li>
-          {person.name} owes {formatMoney(
+          {person.name}: {formatMoney(
             addTaxAndTip(
               items
                 .filter((item) => item.people.includes(person.name))
                 .reduce((prev, cur) => prev + cur.price / cur.people.length, 0)
             )
           )}
-          <ul>
+          <!-- <ul>
             {#each items as item}
               {#if item.people.includes(person.name)}
                 <li>
@@ -316,11 +316,11 @@
                 </li>
               {/if}
             {/each}
-          </ul>
+          </ul> -->
         </li>
       {/each}
     </ul>
-
+    <hr>
     <div>Subtotal: {formatMoney(+subtotal)}</div>
     <div>Tax: {formatMoney(taxTotal)}</div>
     <div>Tip: {formatMoney(tipTotal)}</div>
