@@ -154,7 +154,8 @@
       <span>$</span>
       <input
         autofocus
-        placeholder="subtotal"
+        placeholder="0.00"
+        class="numberInput"
         inputmode="decimal"
         bind:value={subtotal}
       />
@@ -172,7 +173,8 @@
         <input
           autofocus
           id="item-price-input"
-          placeholder="item price"
+          placeholder="0.00"
+          class="numberInput"
           inputmode="decimal"
           bind:this={itemPriceInput}
           bind:value={itemValue}
@@ -244,6 +246,8 @@
         id="tax-input"
         inputmode="decimal"
         value={taxPercentage}
+        placeholder="0.00"
+        class="numberInput"
         on:input={(e) => setTaxFromPercent(e.target.value)}
       />
       =
@@ -323,5 +327,8 @@
   }
   .error {
     color: #e22;
+  }
+  .numberInput {
+    max-width: 4rem;
   }
 </style>
