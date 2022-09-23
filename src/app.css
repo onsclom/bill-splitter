@@ -33,7 +33,7 @@ input[type=submit], button {
   padding: .5rem;
 }
 
-input[type=number] {
+input[inputmode=decimal] {
   max-width: 4rem;
 }
 

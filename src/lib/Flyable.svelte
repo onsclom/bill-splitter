@@ -12,6 +12,8 @@ out:fly="{{ x: (reverse?distance:-distance), duration: dur}}">
 
 <style>
   div {
-    position: absolute
+    position: absolute;
+    width: 100%;
+    text-align: center;
   }
 </style>
