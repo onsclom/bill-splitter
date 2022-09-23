@@ -1,4 +1,5 @@
 <script>
+  import { tick } from "svelte";
   import Flyable from "./lib/Flyable.svelte";
 
   const states = {
@@ -24,6 +25,7 @@
   let taxTotal;
   let nameInput;
   let itemPriceInput;
+  let reverse = false;
 
   function setTipFromDollar(dollar) {
     tipTotal = dollar;
@@ -50,12 +52,16 @@
     setTipFromPercent(tipPercentage);
   }
 
-  function nextState() {
+  async function nextState() {
+    reverse = false;
+    await tick();
     state += 1;
     if (state == states.Tip) updateTaxAndTipFromPercent();
   }
 
-  function goBack() {
+  async function goBack() {
+    reverse = true;
+    await tick();
     state -= 1;
   }
 
@@ -121,7 +127,7 @@
   <button disabled={state == states.People} on:click={goBack}>back</button>
   <br />
   {#if state == states.People}
-    <Flyable>
+    <Flyable {reverse}>
       <form on:submit|preventDefault={submitPerson} autocomplete="off">
         <label for="name-input">name #{people.length + 1}</label>
         <input
@@ -154,7 +160,7 @@
       </ul>
     </Flyable>
   {:else if state == states.Subtotal}
-    <Flyable>
+    <Flyable {reverse}>
       <p>Enter subtotal <em>(total before tax and tip)</em></p>
       <form on:submit|preventDefault={nextState} autocomplete="off">
         <span>$</span>
@@ -168,7 +174,7 @@
       </form>
     </Flyable>
   {:else if state == states.Items}
-    <Flyable>
+    <Flyable {reverse}>
       {#if +remainingSubtotal.toFixed(2) != 0}
         {#if items.length}
           <button on:click={splitRemaining}
@@ -252,7 +258,7 @@
       {/each}
     </Flyable>
   {:else if state == states.Tip}
-    <Flyable>
+    <Flyable {reverse}>
       <form on:submit|preventDefault={nextState} autocomplete="off">
         <label for="tax-input">tax %</label><input
           id="tax-input"
@@ -301,7 +307,7 @@
       <div>Total: {formatMoney(+subtotal + +taxTotal + +tipTotal)}</div>
     </Flyable>
   {:else if state == states.Done}
-    <Flyable>
+    <Flyable {reverse}>
       <ul>
         {#each people as person}
           <li>
